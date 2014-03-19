@@ -117,6 +117,7 @@ func fileList(list ...uint32) string {
 
 func buildFlushIndex(out string, paths []string, doFlush bool, fileData map[string]string) {
 	ix := Create(out)
+	defer ix.Close()
 	ix.AddPaths(paths)
 	var files []string
 	for name := range fileData {

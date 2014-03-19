@@ -102,6 +102,7 @@ func Main() {
 	}
 
 	ix := index.Open(index.File())
+	defer ix.Close()
 	ix.Verbose = *verboseFlag
 	var post []uint32
 	if *bruteFlag {

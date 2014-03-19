@@ -110,6 +110,10 @@ func Open(file string) *Index {
 	return ix
 }
 
+func (ix *Index) Close() {
+	ix.data.close()
+}
+
 // slice returns the slice of index data starting at the given byte offset.
 // If n >= 0, the slice must have length at least n and is truncated to length n.
 func (ix *Index) slice(off uint32, n int) []byte {
@@ -414,6 +418,7 @@ func corrupt() {
 type mmapData struct {
 	f *os.File
 	d []byte
+	h uintptr
 }
 
 // mmap maps the given file into memory.

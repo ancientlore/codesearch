@@ -67,6 +67,7 @@ func main() {
 
 	if *listFlag {
 		ix := index.Open(index.File())
+		defer ix.Close()
 		for _, arg := range ix.Paths() {
 			fmt.Printf("%s\n", arg)
 		}
@@ -89,6 +90,7 @@ func main() {
 	}
 	if len(args) == 0 {
 		ix := index.Open(index.File())
+		defer ix.Close()
 		for _, arg := range ix.Paths() {
 			args = append(args, arg)
 		}
@@ -122,6 +124,7 @@ func main() {
 	}
 
 	ix := index.Create(file)
+	defer ix.Close()
 	ix.Verbose = *verboseFlag
 	ix.AddPaths(args)
 	for _, arg := range args {
