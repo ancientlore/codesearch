@@ -20,7 +20,7 @@ const (
 
 func mmapFile(f *os.File) mmapData {
 	st, err := f.Stat()
-	n := f.Name()
+	fn := f.Name()
 	if err != nil {
 		f.Close()
 		log.Fatal(err)
@@ -28,7 +28,7 @@ func mmapFile(f *os.File) mmapData {
 	size := st.Size()
 	if int64(int(size+4095)) != size+4095 {
 		f.Close()
-		log.Fatalf("%s: too large for mmap", n)
+		log.Fatalf("%s: too large for mmap", fn)
 	}
 	n := int(size)
 	if n == 0 {
@@ -37,7 +37,7 @@ func mmapFile(f *os.File) mmapData {
 	data, err := syscall.Mmap(int(f.Fd()), 0, (n+4095)&^4095, _PROT_READ, _MAP_SHARED)
 	if err != nil {
 		f.Close()
-		log.Fatalf("mmap %s: %v", n, err)
+		log.Fatalf("mmap %s: %v", fn, err)
 	}
 	return mmapData{f, data[:n], 0}
 }
