@@ -44,6 +44,9 @@ func TestMerge(t *testing.T) {
 	defer os.Remove(f1.Name())
 	defer os.Remove(f2.Name())
 	defer os.Remove(f3.Name())
+	defer f1.Close()
+	defer f2.Close()
+	defer f3.Close()
 
 	out1 := f1.Name()
 	out2 := f2.Name()
@@ -57,7 +60,10 @@ func TestMerge(t *testing.T) {
 	ix1 := Open(out1)
 	ix2 := Open(out2)
 	ix3 := Open(out3)
-
+	defer ix1.Close()
+	defer ix2.Close()
+	defer ix3.Close()
+	
 	nameof := func(ix *Index) string {
 		switch {
 		case ix == ix1:

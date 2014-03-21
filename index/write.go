@@ -71,7 +71,18 @@ func Create(file string) *IndexWriter {
 }
 
 func (ix *IndexWriter) Close() {
-
+	if ix.nameData != nil {
+		ix.nameData.close()
+	}
+	if ix.nameIndex != nil {
+		ix.nameIndex.close()
+	}
+	if ix.postIndex != nil {	
+		ix.postIndex.close()
+	}
+	if ix.main != nil {	
+		ix.main.close()
+	}
 }
 
 // A postEntry is an in-memory (trigram, file#) pair.
@@ -221,11 +232,16 @@ func (ix *IndexWriter) Flush() {
 	}
 	ix.main.writeString(trailerMagic)
 
+	ix.nameData.close()
 	os.Remove(ix.nameData.name)
 	for _, f := range ix.postFile {
-		os.Remove(f.Name())
+		nm := f.Name()
+		f.Close()
+		os.Remove(nm)
 	}
+	ix.nameIndex.close()
 	os.Remove(ix.nameIndex.name)
+	ix.postIndex.close()
 	os.Remove(ix.postIndex.name)
 
 	log.Printf("%d data bytes, %d index bytes", ix.totalBytes, ix.main.offset())
@@ -576,6 +592,12 @@ func (b *bufWriter) writeUvarint(x uint32) {
 		b.buf = append(b.buf, byte(x|0x80), byte(x>>7|0x80), byte(x>>14|0x80), byte(x>>21))
 	default:
 		b.buf = append(b.buf, byte(x|0x80), byte(x>>7|0x80), byte(x>>14|0x80), byte(x>>21|0x80), byte(x>>28))
+	}
+}
+
+func (b *bufWriter) close() {
+	if b.file != nil {
+		b.file.Close()
 	}
 }
 

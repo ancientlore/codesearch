@@ -140,6 +140,7 @@ func buildIndex(name string, paths []string, fileData map[string]string) {
 func testTrivialWrite(t *testing.T, doFlush bool) {
 	f, _ := ioutil.TempFile("", "index-test")
 	defer os.Remove(f.Name())
+	defer f.Close()
 	out := f.Name()
 	buildFlushIndex(out, nil, doFlush, trivialFiles)
 

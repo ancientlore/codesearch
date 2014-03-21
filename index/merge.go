@@ -53,6 +53,8 @@ type postIndex struct {
 func Merge(dst, src1, src2 string) {
 	ix1 := Open(src1)
 	ix2 := Open(src2)
+	defer ix1.Close()
+	defer ix2.Close()
 	paths1 := ix1.Paths()
 	paths2 := ix2.Paths()
 
@@ -105,6 +107,7 @@ func Merge(dst, src1, src2 string) {
 	numName := new
 
 	ix3 := bufCreate(dst)
+	defer ix3.close()
 	ix3.writeString(magic)
 
 	// Merged list of paths.
@@ -133,6 +136,8 @@ func Merge(dst, src1, src2 string) {
 	// Merged list of names.
 	nameData := ix3.offset()
 	nameIndexFile := bufCreate("")
+	defer os.Remove(nameIndexFile.name)
+	defer nameIndexFile.close()
 	new = 0
 	mi1 = 0
 	mi2 = 0
@@ -172,6 +177,8 @@ func Merge(dst, src1, src2 string) {
 	r1.init(ix1, map1)
 	r2.init(ix2, map2)
 	w.init(ix3)
+	defer os.Remove(w.postIndexFile.name)
+	defer w.close()
 	for {
 		if r1.trigram < r2.trigram {
 			w.trigram(r1.trigram)
@@ -226,9 +233,6 @@ func Merge(dst, src1, src2 string) {
 	ix3.writeUint32(postIndex)
 	ix3.writeString(trailerMagic)
 	ix3.flush()
-
-	os.Remove(nameIndexFile.name)
-	os.Remove(w.postIndexFile.name)
 }
 
 type postMapReader struct {
@@ -341,4 +345,10 @@ func (w *postDataWriter) endTrigram() {
 	w.postIndexFile.writeTrigram(w.t)
 	w.postIndexFile.writeUint32(w.count)
 	w.postIndexFile.writeUint32(w.offset - w.base)
+}
+
+func (w *postDataWriter) close() {
+	if w.postIndexFile != nil {
+		w.postIndexFile.close()
+	}
 }
